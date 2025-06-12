@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using chirpAPI.Model;
+using chirpApi.Services.Model;
 using Microsoft.EntityFrameworkCore;
 
 namespace chirpAPI;

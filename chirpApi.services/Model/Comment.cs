@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace chirpAPI.Model;
+namespace chirpApi.Services.Model;
 
 public partial class Comment
 {

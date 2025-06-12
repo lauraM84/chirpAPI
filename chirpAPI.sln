@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35931.197 d17.13
+VisualStudioVersion = 17.13.35931.197
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "chirpAPI", "chirpAPI\chirpAPI.csproj", "{4E359649-5B3A-4C64-A72B-CC595D49320F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "chirpApi.Services", "chirpApi.services\chirpApi.Services.csproj", "{D6BDE922-927B-4C88-A9F5-A02F156F01EB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{4E359649-5B3A-4C64-A72B-CC595D49320F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4E359649-5B3A-4C64-A72B-CC595D49320F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4E359649-5B3A-4C64-A72B-CC595D49320F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D6BDE922-927B-4C88-A9F5-A02F156F01EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6BDE922-927B-4C88-A9F5-A02F156F01EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6BDE922-927B-4C88-A9F5-A02F156F01EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6BDE922-927B-4C88-A9F5-A02F156F01EB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

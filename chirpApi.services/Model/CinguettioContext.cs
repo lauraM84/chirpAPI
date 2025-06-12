@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
-namespace chirpAPI.Model;
+namespace chirpApi.Services.Model;
 
 public partial class CinguettioContext : DbContext
 {

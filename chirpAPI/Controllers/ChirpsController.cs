@@ -5,7 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using chirpAPI.Model;
+using chirpApi.Services.Model;
+using chirpApi.Services.Services.Interfaces;
 
 namespace chirpAPI.Controllers
 {
@@ -13,23 +14,41 @@ namespace chirpAPI.Controllers
     [ApiController]
     public class ChirpsController : ControllerBase
     {
-        private readonly CinguettioContext _context;
+        private readonly IChirpsService _chirpsService;
 
-        public ChirpsController(CinguettioContext context)
+        public ChirpsController(IChirpsService chirpsService)
         {
-            _context = context;
+            _chirpsService = chirpsService;
         }
 
         // GET: api/Chirps
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Chirp>>> GetChirps()
+        public async Task<IActionResult>GetChirpsByFilter([FromQuery] ChirpFilter filter)
+        {
+            
+
+            var result = await _chirpsService.GetChirpsByFilter(filter);
+
+            if (result == null || !result.Any())
+            {
+                return NoContent();
+            }
+            else
+            {
+                return Ok(result);
+            }
+        }
+
+        // GET: api/Chirps
+        [HttpGet("all")]
+        public async Task<ActionResult<IEnumerable<Chirp>>> GetAllChirps()
         {
             return await _context.Chirps.ToListAsync();
         }
 
         // GET: api/Chirps/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Chirp>> GetChirp(int id)
+        public async Task<ActionResult<Chirp>> GetChirp([FromRoute] int id)
         {
             var chirp = await _context.Chirps.FindAsync(id);
 
@@ -44,11 +63,11 @@ namespace chirpAPI.Controllers
         // PUT: api/Chirps/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutChirp(int id, Chirp chirp)
+        public async Task<IActionResult> PutChirp([FromRoute] int id, [FromBody] Chirp chirp)
         {
             if (id != chirp.Id)
             {
-                return BadRequest();
+                return BadRequest("id diversi");
             }
 
             _context.Entry(chirp).State = EntityState.Modified;
@@ -75,7 +94,7 @@ namespace chirpAPI.Controllers
         // POST: api/Chirps
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Chirp>> PostChirp(Chirp chirp)
+        public async Task<ActionResult<Chirp>> PostChirp([FromBody] Chirp chirp)
         {
             _context.Chirps.Add(chirp);
             await _context.SaveChangesAsync();
@@ -85,7 +104,7 @@ namespace chirpAPI.Controllers
 
         // DELETE: api/Chirps/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteChirp(int id)
+        public async Task<IActionResult> DeleteChirp([FromRoute] int id)
         {
             var chirp = await _context.Chirps.FindAsync(id);
             if (chirp == null)
