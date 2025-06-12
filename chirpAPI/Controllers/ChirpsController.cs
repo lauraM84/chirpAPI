@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using chirpApi.Services.Model;
 using chirpApi.Services.Services.Interfaces;
+using chirpApi.Services.Model.Filters;
+using chirpApi.Services.Model.DTOs;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace chirpAPI.Controllers
 {
@@ -15,17 +18,21 @@ namespace chirpAPI.Controllers
     public class ChirpsController : ControllerBase
     {
         private readonly IChirpsService _chirpsService;
+        private readonly CinguettioContext _context;
+        private readonly ILogger<ChirpsController> _logger;
 
-        public ChirpsController(IChirpsService chirpsService)
+        public ChirpsController(IChirpsService chirpsService, CinguettioContext context, ILogger<ChirpsController> logger)
         {
             _chirpsService = chirpsService;
+            _context = context;
+            _logger = logger;
         }
 
         // GET: api/Chirps
         [HttpGet]
         public async Task<IActionResult>GetChirpsByFilter([FromQuery] ChirpFilter filter)
         {
-            
+            _logger.LogInformation("ChirpsController: GetChirpsByFilter called with filter: {@Filter}", filter);
 
             var result = await _chirpsService.GetChirpsByFilter(filter);
 
@@ -41,14 +48,24 @@ namespace chirpAPI.Controllers
 
         // GET: api/Chirps
         [HttpGet("all")]
-        public async Task<ActionResult<IEnumerable<Chirp>>> GetAllChirps()
+        public async Task<IActionResult> GetAllChirps()
         {
-            return await _context.Chirps.ToListAsync();
+            var result = await _chirpsService.GetAllChirps();
+            if (result == null || !result.Any())
+            {
+                _logger.LogInformation("no chirps found");
+                return NoContent();
+            }
+            else
+            {
+                _logger.LogInformation("found {Count} chirps", result.Count);
+                return Ok(result);
+            }
         }
 
         // GET: api/Chirps/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Chirp>> GetChirp([FromRoute] int id)
+        public async Task<IActionResult>GetChirpById([FromRoute] int id)
         {
             var chirp = await _context.Chirps.FindAsync(id);
 
@@ -57,70 +74,57 @@ namespace chirpAPI.Controllers
                 return NotFound();
             }
 
-            return chirp;
+            return Ok(chirp);
         }
 
         // PUT: api/Chirps/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutChirp([FromRoute] int id, [FromBody] Chirp chirp)
+        public async Task<IActionResult> PutChirp([FromRoute] int id, [FromBody] ChirpUpdateDTO chirp)
         {
-            if (id != chirp.Id)
-            {
-                return BadRequest("id diversi");
-            }
+            var result = await _chirpsService.UpdateChirp(id, chirp);
 
-            _context.Entry(chirp).State = EntityState.Modified;
-
-            try
+            if (result == false)
             {
-                await _context.SaveChangesAsync();
+               
+                return BadRequest("Chirp not found or update failed. Please check the ID and data provided.");
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ChirpExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
             return NoContent();
         }
 
         // POST: api/Chirps
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Chirp>> PostChirp([FromBody] Chirp chirp)
+        public async Task<IActionResult> PostChirp([FromBody] ChirpCreateDTO chirp)
         {
-            _context.Chirps.Add(chirp);
-            await _context.SaveChangesAsync();
+            var chirpId = await _chirpsService.CreateChirp(chirp);
 
-            return CreatedAtAction("GetChirp", new { id = chirp.Id }, chirp);
+            if (chirpId ==null )
+            {
+                return BadRequest("text obbligatorio");
+            }
+            
+
+            return Created($"api/Chirps/{chirp}", chirpId);
         }
 
         // DELETE: api/Chirps/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteChirp([FromRoute] int id)
         {
-            var chirp = await _context.Chirps.FindAsync(id);
-            if (chirp == null)
+            int? result = await _chirpsService.DeleteChirp(id);
+
+            if (result == null)
             {
-                return NotFound();
+                return BadRequest("chirp non esistente");
+            }
+            if (result == -1)
+            {
+                return BadRequest("eliminare prima i commenti");
             }
 
-            _context.Chirps.Remove(chirp);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            return Ok(result);
         }
-
-        private bool ChirpExists(int id)
-        {
-            return _context.Chirps.Any(e => e.Id == id);
-        }
+       
     }
 }
